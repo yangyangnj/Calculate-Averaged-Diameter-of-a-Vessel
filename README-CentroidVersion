@@ -1,0 +1,53 @@
+# Abaqus ODB Centroid-Based Deformed Radius Calculator
+
+A Python post-processing script for Abaqus ODB files that computes the cross-sectional deformed radius of cylindrical, tapered, or shell vessel structures. It accounts for potential axial tilt, rigid-body shift, or centerline variation by discretizing the geometry into axial cross-sectional slices and calculating local centroids.
+
+---
+
+### Features
+
+* **Per-Slice Local Centroid Correction:** Discretizes the axial span into cross-sectional bins along the $Y$-axis and evaluates local centroids $(X_c, Z_c)$ for each slice to eliminate rigid-body displacement or axial tilt errors.
+* **Partial Ring Protection:** Enforces node-count density thresholds per slice to prevent incomplete boundary rings or partial arcs from skewing cross-sectional calculations.
+* **Axial Boundary Clipping:** Filters out transition features, flared ends, or boundary clipping by restricting calculations to a uniform axial $Y$-span.
+* **Robust Nodal Mapping:** Binds displacement outputs directly to `OdbMeshNode` labels to ensure strict index alignment across shell and solid elements.
+
+---
+
+### Prerequisites
+
+* **Abaqus Environment:** Runs using the Abaqus Python interpreter (`abq2023` or equivalent).
+* **Python Libraries:** Requires standard Abaqus extraction modules (`odbAccess`) and `numpy`.
+
+---
+
+### Configuration Parameters
+
+Edit the top section of `CalAvgRadiusOnNodeSet-Centroid.py` to match your simulation setup:
+
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `odb_path` | `str` | File path to the `.odb` file. |
+| `instance_name` | `str` | Target part instance name (e.g., `TAPPEREDVESSEL-1`). |
+| `target_node_set` | `str` | Target node set name (e.g., `VESSEL-WIDER-PORTION`). |
+| `step_name` | `str` | Analysis step to process (e.g., `Unload-80-C6`). |
+| `frame_index` | `int` | Frame index within the step (`-1` evaluates the final frame). |
+| `y_min_cut` | `float` | Lower $Y$-coordinate boundary cut (in mm). |
+| `y_max_cut` | `float` | Upper $Y$-coordinate boundary cut (in mm). |
+| `num_slices` | `int` | Number of axial discretization bins along the $Y$-span. |
+
+---
+
+### Usage
+
+Execute the script directly via the Abaqus Python interface in your terminal:
+
+```bash
+abq2023 python CalAvgRadiusOnNodeSet-Centroid.py
+==========================================================
+ UNIFORM CYLINDER DEFORMED RADIUS ANALYSIS
+ Evaluated Y-Span: [49.50, 62.00] mm
+==========================================================
+Averaged Radius:  8.961085 mm
+Min Radius:       8.768234 mm
+Max Radius:       9.537484 mm
+==========================================================
